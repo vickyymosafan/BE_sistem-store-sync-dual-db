@@ -654,6 +654,31 @@
         </div>
     </div>
 
+    <!-- Modal: Add/Update Stock -->
+    <div id="modal-stock" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Tambah/Update Stok</h3>
+            </div>
+            <form id="form-stock" onsubmit="saveStock(event)">
+                <div class="form-group">
+                    <label>Produk:</label>
+                    <select id="stock-product" class="form-control" required>
+                        <option value="">Pilih Produk...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Jumlah Stok:</label>
+                    <input type="number" id="stock-quantity" class="form-control" min="0" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('modal-stock')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="dashboard.js"></script>
 </body>
 </html>

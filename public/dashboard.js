@@ -431,24 +431,86 @@ async function loadInventory() {
         const inventory = await response.json();
         
         let html = '<table><thead><tr>';
-        html += '<th>Kode</th><th>Nama Produk</th><th>Stok</th><th>Satuan</th><th>Terakhir Update</th>';
+        html += '<th>Kode</th><th>Nama Produk</th><th>Stok</th><th>Satuan</th><th>Terakhir Update</th><th>Aksi</th>';
         html += '</tr></thead><tbody>';
         
-        inventory.forEach(item => {
-            html += `<tr>
-                <td>${item.productCode}</td>
-                <td>${item.productName}</td>
-                <td>${item.quantity}</td>
-                <td>${item.unit}</td>
-                <td>${new Date(item.updatedAt).toLocaleString('id-ID')}</td>
-            </tr>`;
-        });
+        if (inventory.length === 0) {
+            html += '<tr><td colspan="6" class="empty">Belum ada data stok. Klik "Tambah Stok" untuk menambahkan.</td></tr>';
+        } else {
+            inventory.forEach(item => {
+                html += `<tr>
+                    <td>${item.productCode}</td>
+                    <td>${item.productName}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.unit}</td>
+                    <td>${new Date(item.updatedAt).toLocaleString('id-ID')}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick='showEditStockModal(${JSON.stringify(item)})'>Edit</button>
+                    </td>
+                </tr>`;
+            });
+        }
         
         html += '</tbody></table>';
         document.getElementById('inventory-table-container').innerHTML = html;
     } catch (error) {
         document.getElementById('inventory-table-container').innerHTML = 
             `<div class="alert alert-error">Gagal memuat data: ${error.message}</div>`;
+    }
+}
+
+async function showAddStockModal() {
+    document.getElementById('form-stock').reset();
+    await loadProductsForStock();
+    document.getElementById('modal-stock').classList.add('active');
+}
+
+async function showEditStockModal(item) {
+    await loadProductsForStock();
+    document.getElementById('stock-product').value = item.productId;
+    document.getElementById('stock-quantity').value = item.quantity;
+    document.getElementById('modal-stock').classList.add('active');
+}
+
+async function loadProductsForStock() {
+    try {
+        const response = await fetch('/branch/bondowoso/products');
+        const products = await response.json();
+        
+        let html = '<option value="">Pilih Produk...</option>';
+        products.filter(p => p.active).forEach(product => {
+            html += `<option value="${product.id}">${product.code} - ${product.name}</option>`;
+        });
+        
+        document.getElementById('stock-product').innerHTML = html;
+    } catch (error) {
+        console.error('Error loading products:', error);
+    }
+}
+
+async function saveStock(event) {
+    event.preventDefault();
+    
+    const productId = document.getElementById('stock-product').value;
+    const quantity = parseInt(document.getElementById('stock-quantity').value);
+    
+    try {
+        const response = await fetch('/branch/bondowoso/inventory', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, quantity })
+        });
+        
+        if (response.ok) {
+            closeModal('modal-stock');
+            loadInventory();
+            showAlert('success', 'Stok berhasil disimpan!');
+        } else {
+            const error = await response.json();
+            showAlert('error', error.message || 'Gagal menyimpan stok');
+        }
+    } catch (error) {
+        showAlert('error', `Error: ${error.message}`);
     }
 }
 

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { listBranchInventoryHandler } from '../handlers/branch/listBranchInventoryHandler';
+import { updateBranchInventoryHandler } from '../handlers/branch/updateBranchInventoryHandler';
 import { createBranchSaleHandler } from '../handlers/branch/createBranchSaleHandler';
 import { listBranchSalesHandler } from '../handlers/branch/listBranchSalesHandler';
 import { getBranchProductsHandler, getBranchStoresHandler } from '../handlers/branch/branchDataHandler';
@@ -12,6 +13,7 @@ const router = Router();
 router.get('/bondowoso/products', getBranchProductsHandler);
 router.get('/bondowoso/stores', getBranchStoresHandler);
 router.get('/bondowoso/inventory', listBranchInventoryHandler);
+router.post('/bondowoso/inventory', updateBranchInventoryHandler);
 
 // Branch sales routes
 router.post(
