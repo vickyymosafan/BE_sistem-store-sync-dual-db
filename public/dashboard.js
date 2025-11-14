@@ -2,6 +2,13 @@
 let cart = [];
 let currentEditProductId = null;
 
+// Helper function to normalize date to midnight (00:00:00) for comparison
+function normalizeDate(date) {
+    const normalized = new Date(date);
+    normalized.setHours(0, 0, 0, 0);
+    return normalized;
+}
+
 // Navigation functions
 function switchSection(section) {
     // Update nav tabs
@@ -239,14 +246,15 @@ async function loadPrices() {
             html += '<tr><td colspan="7" class="empty">Tidak ada harga untuk produk aktif</td></tr>';
         } else {
             prices.forEach(price => {
-                const now = new Date();
-                const start = new Date(price.startDate);
-                const end = price.endDate ? new Date(price.endDate) : null;
+                // Normalize dates to midnight for accurate date-only comparison
+                const today = normalizeDate(new Date());
+                const start = normalizeDate(price.startDate);
+                const end = price.endDate ? normalizeDate(price.endDate) : null;
                 
                 let statusBadge;
-                if (start > now) {
+                if (start > today) {
                     statusBadge = '<span class="badge badge-info">Belum Aktif</span>';
-                } else if (end && end < now) {
+                } else if (end && end < today) {
                     statusBadge = '<span class="badge badge-warning">Berakhir</span>';
                 } else {
                     statusBadge = '<span class="badge badge-success">Aktif</span>';
@@ -381,15 +389,16 @@ async function loadBranchProducts() {
             html += '<tr><td colspan="7" class="empty">Belum ada data. Klik "Sync dari Pusat" untuk mengambil data.</td></tr>';
         } else {
             products.forEach(product => {
-                const now = new Date();
-                const start = product.startDate ? new Date(product.startDate) : null;
-                const end = product.endDate ? new Date(product.endDate) : null;
+                // Normalize dates to midnight for accurate date-only comparison
+                const today = normalizeDate(new Date());
+                const start = product.startDate ? normalizeDate(product.startDate) : null;
+                const end = product.endDate ? normalizeDate(product.endDate) : null;
                 
                 let priceStatusBadge = '<span class="badge badge-warning">Belum Ada Harga</span>';
                 if (start) {
-                    if (start > now) {
+                    if (start > today) {
                         priceStatusBadge = '<span class="badge badge-info">Belum Aktif</span>';
-                    } else if (end && end < now) {
+                    } else if (end && end < today) {
                         priceStatusBadge = '<span class="badge badge-warning">Berakhir</span>';
                     } else {
                         priceStatusBadge = '<span class="badge badge-success">Aktif</span>';
