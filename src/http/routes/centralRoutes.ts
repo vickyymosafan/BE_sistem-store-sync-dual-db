@@ -26,8 +26,7 @@ router.get('/prices/:storeId', validateParams(storeIdParamSchema), listActivePri
 // Price management routes
 router.post('/prices', validateBody(createPriceRequestSchema), createOrUpdatePriceHandler);
 router.post(
-  '/sync/prices/:storeId',
-  validateParams(storeIdParamSchema),
+  '/sync/prices/:storeCode',
   syncPricesToBranchHandler
 );
 

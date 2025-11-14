@@ -396,7 +396,7 @@ async function syncProductsFromCentral() {
     if (!confirm('Sinkronisasi produk dan harga dari pusat? Data lokal akan diperbarui.')) return;
     
     try {
-        // Get branch store ID
+        // Get branch store CODE (not ID, because IDs differ between databases)
         const storesResponse = await fetch('/branch/bondowoso/stores');
         const stores = await storesResponse.json();
         const branchStore = stores.find(s => s.type === 'BRANCH');
@@ -406,7 +406,8 @@ async function syncProductsFromCentral() {
             return;
         }
         
-        const response = await fetch(`/central/sync/prices/${branchStore.id}`, {
+        // Use store CODE for sync, not ID
+        const response = await fetch(`/central/sync/prices/${branchStore.code}`, {
             method: 'POST'
         });
         
