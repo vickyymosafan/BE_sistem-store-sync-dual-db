@@ -232,25 +232,29 @@ async function loadPrices() {
         }
         
         let html = '<table><thead><tr>';
-        html += '<th>Cabang</th><th>Kode Produk</th><th>Nama Produk</th><th>Harga Jual</th><th>Mulai</th><th>Selesai</th><th>Status</th>';
+        html += '<th>Cabang</th><th>Kode Produk</th><th>Nama Produk</th><th>Harga Jual</th><th>Mulai</th><th>Selesai</th><th>Status Harga</th>';
         html += '</tr></thead><tbody>';
         
-        prices.forEach(price => {
-            const now = new Date();
-            const start = new Date(price.startDate);
-            const end = price.endDate ? new Date(price.endDate) : null;
-            const isActive = start <= now && (!end || end >= now);
-            
-            html += `<tr>
-                <td>${price.storeName || '-'}</td>
-                <td>${price.productCode}</td>
-                <td>${price.productName}</td>
-                <td>Rp ${parseInt(price.salePrice).toLocaleString('id-ID')}</td>
-                <td>${new Date(price.startDate).toLocaleDateString('id-ID')}</td>
-                <td>${price.endDate ? new Date(price.endDate).toLocaleDateString('id-ID') : '-'}</td>
-                <td>${isActive ? '<span class="badge badge-success">Aktif</span>' : '<span class="badge badge-warning">Berakhir</span>'}</td>
-            </tr>`;
-        });
+        if (prices.length === 0) {
+            html += '<tr><td colspan="7" class="empty">Tidak ada harga untuk produk aktif</td></tr>';
+        } else {
+            prices.forEach(price => {
+                const now = new Date();
+                const start = new Date(price.startDate);
+                const end = price.endDate ? new Date(price.endDate) : null;
+                const isActive = start <= now && (!end || end >= now);
+                
+                html += `<tr>
+                    <td>${price.storeName || '-'}</td>
+                    <td>${price.productCode}</td>
+                    <td>${price.productName}</td>
+                    <td>Rp ${parseInt(price.salePrice).toLocaleString('id-ID')}</td>
+                    <td>${new Date(price.startDate).toLocaleDateString('id-ID')}</td>
+                    <td>${price.endDate ? new Date(price.endDate).toLocaleDateString('id-ID') : '-'}</td>
+                    <td>${isActive ? '<span class="badge badge-success">Aktif</span>' : '<span class="badge badge-warning">Berakhir</span>'}</td>
+                </tr>`;
+            });
+        }
         
         html += '</tbody></table>';
         document.getElementById('prices-table-container').innerHTML = html;

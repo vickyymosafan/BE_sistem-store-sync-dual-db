@@ -11,6 +11,9 @@ export class PriceRepositoryPrisma implements IPriceRepository {
         storeId,
         startDate: { lte: date },
         OR: [{ endDate: null }, { endDate: { gte: date } }],
+        product: {
+          active: true,
+        },
       },
     });
     return prices.map(this.toDomain);

@@ -19,8 +19,9 @@ export async function getBranchProductsHandler(
       return;
     }
     
-    // Get products with their prices
+    // Get products with their prices (only active products)
     const products = await prismaBranch.product.findMany({
+      where: { active: true },
       orderBy: { code: 'asc' },
     });
     
