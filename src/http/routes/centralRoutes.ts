@@ -6,7 +6,7 @@ import { createOrUpdatePriceHandler } from '../handlers/central/createOrUpdatePr
 import { syncBranchSalesToCentralHandler } from '../handlers/central/syncBranchSalesToCentralHandler';
 import { syncPricesToBranchHandler } from '../handlers/central/syncPricesToBranchHandler';
 import { listDailySalesSummaryHandler } from '../handlers/central/listDailySalesSummaryHandler';
-import { createProductHandler, updateProductHandler } from '../handlers/central/productManagementHandler';
+import { createProductHandler, updateProductHandler, deleteProductHandler } from '../handlers/central/productManagementHandler';
 import { getSyncLogsHandler } from '../handlers/central/syncLogsHandler';
 import { validateParams, validateBody, validateQuery } from '../middleware/validationMiddleware';
 import { storeIdParamSchema } from '../schemas/commonSchemas';
@@ -20,6 +20,7 @@ router.get('/stores', listStoresHandler);
 router.get('/products', listProductsHandler);
 router.post('/products', createProductHandler);
 router.put('/products/:id', updateProductHandler);
+router.delete('/products/:id', deleteProductHandler);
 router.get('/prices/:storeId', validateParams(storeIdParamSchema), listActivePricesHandler);
 
 // Price management routes

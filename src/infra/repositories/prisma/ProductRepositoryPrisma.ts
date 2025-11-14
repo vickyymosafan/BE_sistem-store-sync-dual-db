@@ -59,6 +59,19 @@ export class ProductRepositoryPrisma implements IProductRepository {
     return this.toDomain(product);
   }
 
+  async delete(id: string): Promise<boolean> {
+    try {
+      // Prisma will cascade delete related prices, inventory, and sale items
+      // based on schema relations
+      await this.prisma.product.delete({
+        where: { id },
+      });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
   private toDomain(product: any): Product {
     return {
       id: product.id,

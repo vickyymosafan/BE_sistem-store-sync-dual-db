@@ -101,6 +101,7 @@ async function loadProducts() {
                     <button class="btn btn-sm btn-${product.active ? 'warning' : 'success'}" onclick="toggleProductStatus('${product.id}', ${!product.active})">
                         ${product.active ? 'Nonaktifkan' : 'Aktifkan'}
                     </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteProduct('${product.id}', '${product.name}')">Hapus</button>
                 </td>
             </tr>`;
         });
@@ -159,6 +160,28 @@ async function toggleProductStatus(id, active) {
         if (response.ok) {
             loadProducts();
             showAlert('success', `Produk berhasil ${active ? 'diaktifkan' : 'dinonaktifkan'}!`);
+        }
+    } catch (error) {
+        showAlert('error', `Error: ${error.message}`);
+    }
+}
+
+async function deleteProduct(id, name) {
+    if (!confirm(`Apakah Anda yakin ingin menghapus produk "${name}"?\n\nPeringatan: Semua harga, inventory, dan data terkait produk ini akan ikut terhapus!`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/central/products/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            loadProducts();
+            showAlert('success', `Produk "${name}" berhasil dihapus beserta semua data terkait!`);
+        } else {
+            const error = await response.json();
+            showAlert('error', error.message || 'Gagal menghapus produk');
         }
     } catch (error) {
         showAlert('error', `Error: ${error.message}`);
@@ -243,13 +266,18 @@ async function loadProductsForPrice() {
 async function savePrice(event) {
     event.preventDefault();
     
+    const endDateValue = document.getElementById('price-end').value;
     const data = {
         storeId: document.getElementById('price-store').value,
         productId: document.getElementById('price-product').value,
         salePrice: parseInt(document.getElementById('price-amount').value),
-        startDate: document.getElementById('price-start').value,
-        endDate: document.getElementById('price-end').value || null
+        startDate: document.getElementById('price-start').value
     };
+    
+    // Only add endDate if it has a value
+    if (endDateValue) {
+        data.endDate = endDateValue;
+    }
     
     try {
         const response = await fetch('/central/prices', {

@@ -20,4 +20,5 @@ export interface IProductRepository {
       active?: boolean;
     }
   ): Promise<Product | null>;
+  delete(id: string): Promise<boolean>;
 }

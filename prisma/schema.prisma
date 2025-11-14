@@ -66,7 +66,7 @@ model Price {
   updatedAt DateTime @updatedAt
 
   store   Store   @relation(fields: [storeId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([storeId, productId, startDate])
   @@index([storeId, startDate, endDate])
@@ -80,7 +80,7 @@ model Inventory {
   updatedAt DateTime @updatedAt
 
   store   Store   @relation(fields: [storeId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([storeId, productId])
   @@index([storeId])
@@ -113,7 +113,7 @@ model SaleItem {
   subtotal  Decimal @db.Decimal(12, 2)
 
   sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([saleId])
 }
