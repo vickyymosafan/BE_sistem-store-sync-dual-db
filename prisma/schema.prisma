@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StoreType {
+  CENTRAL
+  BRANCH
+}
+
+enum SyncStatus {
+  PENDING
+  SYNCED
+}
+
+model Store {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  name      String
+  type      StoreType
+  city      String
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  prices     Price[]
+  inventories Inventory[]
+  sales      Sale[]
+  syncLogsAsSource SyncLog[] @relation("SourceStore")
+  syncLogsAsTarget SyncLog[] @relation("TargetStore")
+
+  @@index([code])
+  @@index([type])
+}
+
+model Product {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  name      String
+  category  String
+  unit      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  prices     Price[]
+  inventories Inventory[]
+  saleItems  SaleItem[]
+
+  @@index([code])
+  @@index([active])
+}
+
+model Price {
+  id        String   @id @default(uuid())
+  storeId   String
+  productId String
+  salePrice Decimal  @db.Decimal(10, 2)
+  startDate DateTime
+  endDate   DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  store   Store   @relation(fields: [storeId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([storeId, productId, startDate])
+  @@index([storeId, startDate, endDate])
+}
+
+model Inventory {
+  id        String   @id @default(uuid())
+  storeId   String
+  productId String
+  quantity  Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  store   Store   @relation(fields: [storeId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([storeId, productId])
+  @@index([storeId])
+}
+
+model Sale {
+  id             String     @id @default(uuid())
+  storeId        String
+  timestamp      DateTime   @default(now())
+  grandTotal     Decimal    @db.Decimal(12, 2)
+  syncStatus     SyncStatus @default(PENDING)
+  idempotencyKey String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  store Store      @relation(fields: [storeId], references: [id])
+  items SaleItem[]
+
+  @@unique([storeId, idempotencyKey])
+  @@index([storeId, syncStatus])
+  @@index([timestamp])
+}
+
+model SaleItem {
+  id        String  @id @default(uuid())
+  saleId    String
+  productId String
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+  subtotal  Decimal @db.Decimal(12, 2)
+
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([saleId])
+}
+
+model SyncLog {
+  id             String   @id @default(uuid())
+  sourceStoreId  String
+  targetStoreId  String
+  syncedAt       DateTime @default(now())
+  notes          String?
+  summaryCount   Int
+
+  sourceStore Store @relation("SourceStore", fields: [sourceStoreId], references: [id])
+  targetStore Store @relation("TargetStore", fields: [targetStoreId], references: [id])
+
+  @@index([sourceStoreId, syncedAt])
+}

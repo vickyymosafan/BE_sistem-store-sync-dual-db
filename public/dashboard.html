@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PT Indo Agustus - Sistem Replikasi Database</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar h1 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-tab {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .nav-tab.active {
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .page-header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .page-header h2 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .page-header p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .sub-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .sub-tab {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e1e8ed;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .sub-tab:hover {
+            border-color: #667eea;
+        }
+        
+        .sub-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        th {
+            background: #34495e;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e8ed;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #95a5a6;
+        }
+        
+        .sync-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .sync-indicator.pending {
+            background: #f39c12;
+        }
+        
+        .sync-indicator.synced {
+            background: #27ae60;
+        }
+        
+        .page-content {
+            display: none;
+        }
+        
+        .page-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>🏪 PT Indo Agustus - Sistem Replikasi Database</h1>
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchSection('pusat')">🏢 Pusat Jember</button>
+            <button class="nav-tab" onclick="switchSection('cabang')">🏪 Cabang Bondowoso</button>
+            <button class="nav-tab" onclick="switchSection('logs')">📊 Log Replikasi</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- SECTION: PUSAT JEMBER -->
+        <div id="section-pusat" class="section active">
+            <div class="page-header">
+                <h2>Pusat Jember - Manajemen & Pelaporan</h2>
+                <p>Kelola master data produk, harga, dan lihat laporan penjualan dari semua cabang</p>
+            </div>
+
+            <div class="sub-tabs">
+                <button class="sub-tab active" onclick="switchPusatPage('products')">📦 Master Produk</button>
+                <button class="sub-tab" onclick="switchPusatPage('prices')">💰 Master Harga</button>
+                <button class="sub-tab" onclick="switchPusatPage('reports')">📈 Rekap Penjualan</button>
+            </div>
+
+            <!-- Page: Master Produk -->
+            <div id="page-pusat-products" class="page-content active">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Daftar Produk</div>
+                        <button class="btn btn-primary" onclick="showAddProductModal()">+ Tambah Produk</button>
+                    </div>
+                    <div id="products-table-container">
+                        <div class="loading">Memuat data...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page: Master Harga -->
+            <div id="page-pusat-prices" class="page-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Daftar Harga per Cabang</div>
+                        <button class="btn btn-primary" onclick="showAddPriceModal()">+ Tambah Harga</button>
+                    </div>
+                    <div class="form-group" style="max-width: 300px;">
+                        <label>Filter Cabang:</label>
+                        <select id="price-store-filter" class="form-control" onchange="loadPrices()">
+                            <option value="">Semua Cabang</option>
+                        </select>
+                    </div>
+                    <div id="prices-table-container">
+                        <div class="loading">Memuat data...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page: Rekap Penjualan -->
+            <div id="page-pusat-reports" class="page-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Rekap Penjualan Harian</div>
+                        <button class="btn btn-success" onclick="loadReports()">🔄 Refresh Data</button>
+                    </div>
+                    <div class="form-group" style="max-width: 300px;">
+                        <label>Tanggal:</label>
+                        <input type="date" id="report-date" class="form-control" onchange="loadReports()">
+                    </div>
+                    <div id="reports-table-container">
+                        <div class="loading">Memuat data...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: CABANG BONDOWOSO -->
+        <div id="section-cabang" class="section">
+            <div class="page-header">
+                <h2>Cabang Bondowoso - Operasional Kasir</h2>
+                <p>Kelola transaksi penjualan, stok, dan sinkronisasi data dengan pusat</p>
+            </div>
+
+            <div class="sub-tabs">
+                <button class="sub-tab active" onclick="switchCabangPage('products')">📦 Produk & Harga</button>
+                <button class="sub-tab" onclick="switchCabangPage('inventory')">📊 Stok Barang</button>
+                <button class="sub-tab" onclick="switchCabangPage('sales')">💳 Transaksi Penjualan</button>
+                <button class="sub-tab" onclick="switchCabangPage('sync')">🔄 Antrian Sinkronisasi</button>
+            </div>
+
+            <!-- Page: Produk & Harga Cabang -->
+            <div id="page-cabang-products" class="page-content active">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Produk & Harga Lokal Cabang</div>
+                        <button class="btn btn-success" onclick="syncProductsFromCentral()">⬇️ Sync dari Pusat</button>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Info:</strong> Klik tombol "Sync dari Pusat" untuk mengambil data produk dan harga terbaru dari database pusat.
+                    </div>
+                    <div id="branch-products-table-container">
+                        <div class="loading">Memuat data...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page: Stok Cabang -->
+            <div id="page-cabang-inventory" class="page-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Stok Barang Cabang</div>
+                        <button class="btn btn-primary" onclick="showAddStockModal()">+ Tambah Stok</button>
+                    </div>
+                    <div id="inventory-table-container">
+                        <div class="loading">Memuat data...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page: Transaksi Penjualan -->
+            <div id="page-cabang-sales" class="page-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Buat Transaksi Baru</div>
+                    </div>
+                    <form id="sale-form" onsubmit="createSale(event)">
+                        <div class="form-group">
+                            <label>Produk:</label>
+                            <select id="sale-product" class="form-control" required>
+                                <option value="">Pilih Produk...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Jumlah:</label>
+                            <input type="number" id="sale-quantity" class="form-control" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Harga Satuan:</label>
+                            <input type="number" id="sale-price" class="form-control" readonly>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="addSaleItem()">+ Tambah ke Keranjang</button>
+                    </form>
+                    
+                    <div id="cart-container" style="margin-top: 20px; display: none;">
+                        <h4>Keranjang Belanja</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Produk</th>
+                                    <th>Qty</th>
+                                    <th>Harga</th>
+                                    <th>Subtotal</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cart-items"></tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" style="text-align: right;"><strong>TOTAL:</strong></td>
+                                    <td colspan="2"><strong id="cart-total">Rp 0</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <button class="btn btn-success" style="margin-top: 10px;" onclick="saveSale()">💾 Simpan Transaksi</button>
+                        <button class="btn btn-danger" style="margin-top: 10px;" onclick="clearCart()">🗑️ Batal</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Daftar Transaksi Hari Ini</div>
+                        <button class="btn btn-success" onclick="loadBranchSales()">🔄 Refresh</button>
+                    </div>
+                    <div id="sales-table-container">
+                        <div class="loading">Memuat data...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page: Antrian Sinkronisasi -->
+            <div id="page-cabang-sync" class="page-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Antrian Transaksi untuk Disinkron ke Pusat</div>
+                        <button class="btn btn-success" onclick="syncSalesToCentral()">⬆️ Kirim Semua ke Pusat</button>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Info:</strong> Transaksi dengan status PENDING akan dikirim ke database pusat saat tombol "Kirim Semua ke Pusat" diklik.
+                    </div>
+                    <div id="sync-queue-table-container">
+                        <div class="loading">Memuat data...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: LOG REPLIKASI -->
+        <div id="section-logs" class="section">
+            <div class="page-header">
+                <h2>Log Replikasi Database</h2>
+                <p>Pantau semua aktivitas sinkronisasi data antara pusat dan cabang</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Riwayat Sinkronisasi</div>
+                    <button class="btn btn-success" onclick="loadSyncLogs()">🔄 Refresh</button>
+                </div>
+                <div id="sync-logs-table-container">
+                    <div class="loading">Memuat data...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add/Edit Product -->
+    <div id="modal-product" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-product-title">Tambah Produk</h3>
+            </div>
+            <form id="form-product" onsubmit="saveProduct(event)">
+                <div class="form-group">
+                    <label>Kode Produk:</label>
+                    <input type="text" id="product-code" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Nama Produk:</label>
+                    <input type="text" id="product-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Kategori:</label>
+                    <input type="text" id="product-category" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Satuan:</label>
+                    <input type="text" id="product-unit" class="form-control" required>
+                </div>
+                <input type="hidden" id="product-id">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('modal-product')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add/Edit Price -->
+    <div id="modal-price" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Tambah/Edit Harga</h3>
+            </div>
+            <form id="form-price" onsubmit="savePrice(event)">
+                <div class="form-group">
+                    <label>Cabang:</label>
+                    <select id="price-store" class="form-control" required>
+                        <option value="">Pilih Cabang...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Produk:</label>
+                    <select id="price-product" class="form-control" required>
+                        <option value="">Pilih Produk...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Harga Jual:</label>
+                    <input type="number" id="price-amount" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Tanggal Mulai:</label>
+                    <input type="date" id="price-start" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Tanggal Selesai (Opsional):</label>
+                    <input type="date" id="price-end" class="form-control">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('modal-price')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
