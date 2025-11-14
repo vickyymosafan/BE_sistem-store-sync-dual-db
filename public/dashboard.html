@@ -349,6 +349,17 @@
         .page-content.active {
             display: block;
         }
+        
+        .product-filter-btn {
+            opacity: 0.6;
+            border: 2px solid transparent;
+        }
+        
+        .product-filter-btn.active {
+            opacity: 1;
+            border: 2px solid currentColor;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -381,6 +392,11 @@
                     <div class="card-header">
                         <div class="card-title">Daftar Produk</div>
                         <button class="btn btn-primary" onclick="showAddProductModal()">+ Tambah Produk</button>
+                    </div>
+                    <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+                        <button class="btn btn-sm btn-primary product-filter-btn active" data-status="all" onclick="filterProducts('all')">Semua</button>
+                        <button class="btn btn-sm btn-success product-filter-btn" data-status="active" onclick="filterProducts('active')">Aktif</button>
+                        <button class="btn btn-sm btn-warning product-filter-btn" data-status="inactive" onclick="filterProducts('inactive')">Nonaktif</button>
                     </div>
                     <div id="products-table-container">
                         <div class="loading">Memuat data...</div>

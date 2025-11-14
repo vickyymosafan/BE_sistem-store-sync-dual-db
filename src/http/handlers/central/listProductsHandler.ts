@@ -13,7 +13,19 @@ export async function listProductsHandler(
     const prismaCentral = getPrismaCentral();
     const productRepository = new ProductRepositoryPrisma(prismaCentral);
 
-    const products = await listProducts(productRepository);
+    const status = req.query.status as string | undefined;
+
+    let products;
+    if (status === 'active') {
+      products = await listProducts(productRepository);
+    } else if (status === 'inactive') {
+      const allProducts = await productRepository.findAll();
+      products = allProducts.filter(p => !p.active);
+    } else {
+      // 'all' or no status parameter - return all products
+      products = await productRepository.findAll();
+    }
+
     const productDTOs = products.map(toProductDTO);
 
     res.status(200).json(productDTOs);

@@ -80,31 +80,39 @@ function closeModal(modalId) {
 }
 
 // API: Products
-async function loadProducts() {
+let currentProductFilter = 'all';
+
+async function loadProducts(status = currentProductFilter) {
     try {
-        const response = await fetch('/central/products');
+        const url = status ? `/central/products?status=${status}` : '/central/products';
+        const response = await fetch(url);
         const products = await response.json();
         
         let html = '<table><thead><tr>';
         html += '<th>Kode</th><th>Nama Produk</th><th>Kategori</th><th>Satuan</th><th>Status</th><th>Aksi</th>';
         html += '</tr></thead><tbody>';
         
-        products.forEach(product => {
-            html += `<tr>
-                <td>${product.code}</td>
-                <td>${product.name}</td>
-                <td>${product.category}</td>
-                <td>${product.unit}</td>
-                <td>${product.active ? '<span class="badge badge-success">Aktif</span>' : '<span class="badge badge-danger">Nonaktif</span>'}</td>
-                <td>
-                    <button class="btn btn-sm btn-primary" onclick='showEditProductModal(${JSON.stringify(product)})'>Edit</button>
-                    <button class="btn btn-sm btn-${product.active ? 'warning' : 'success'}" onclick="toggleProductStatus('${product.id}', ${!product.active})">
-                        ${product.active ? 'Nonaktifkan' : 'Aktifkan'}
-                    </button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteProduct('${product.id}', '${product.name}')">Hapus</button>
-                </td>
-            </tr>`;
-        });
+        if (products.length === 0) {
+            const statusText = status === 'active' ? 'aktif' : status === 'inactive' ? 'nonaktif' : '';
+            html += `<tr><td colspan="6" class="empty">Tidak ada produk ${statusText}</td></tr>`;
+        } else {
+            products.forEach(product => {
+                html += `<tr>
+                    <td>${product.code}</td>
+                    <td>${product.name}</td>
+                    <td>${product.category}</td>
+                    <td>${product.unit}</td>
+                    <td>${product.active ? '<span class="badge badge-success">Aktif</span>' : '<span class="badge badge-danger">Nonaktif</span>'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick='showEditProductModal(${JSON.stringify(product)})'>Edit</button>
+                        <button class="btn btn-sm btn-${product.active ? 'warning' : 'success'}" onclick="toggleProductStatus('${product.id}', ${!product.active})">
+                            ${product.active ? 'Nonaktifkan' : 'Aktifkan'}
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteProduct('${product.id}', '${product.name}')">Hapus</button>
+                    </td>
+                </tr>`;
+            });
+        }
         
         html += '</tbody></table>';
         document.getElementById('products-table-container').innerHTML = html;
@@ -112,6 +120,20 @@ async function loadProducts() {
         document.getElementById('products-table-container').innerHTML = 
             `<div class="alert alert-error">Gagal memuat data: ${error.message}</div>`;
     }
+}
+
+function filterProducts(status) {
+    currentProductFilter = status;
+    
+    // Update button states
+    document.querySelectorAll('.product-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-status') === status) {
+            btn.classList.add('active');
+        }
+    });
+    
+    loadProducts(status);
 }
 
 async function saveProduct(event) {
@@ -158,7 +180,7 @@ async function toggleProductStatus(id, active) {
         });
         
         if (response.ok) {
-            loadProducts();
+            loadProducts(currentProductFilter);
             showAlert('success', `Produk berhasil ${active ? 'diaktifkan' : 'dinonaktifkan'}!`);
         }
     } catch (error) {
@@ -177,7 +199,7 @@ async function deleteProduct(id, name) {
         });
         
         if (response.ok) {
-            loadProducts();
+            loadProducts(currentProductFilter);
             showAlert('success', `Produk "${name}" berhasil dihapus beserta semua data terkait!`);
         } else {
             const error = await response.json();
