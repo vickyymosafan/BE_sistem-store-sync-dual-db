@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { listStoresHandler } from '../handlers/central/listStoresHandler';
 import { listProductsHandler } from '../handlers/central/listProductsHandler';
 import { listActivePricesHandler } from '../handlers/central/listActivePricesHandler';
+import { listAllPricesHandler } from '../handlers/central/listAllPricesHandler';
 import { createOrUpdatePriceHandler } from '../handlers/central/createOrUpdatePriceHandler';
 import { syncBranchSalesToCentralHandler } from '../handlers/central/syncBranchSalesToCentralHandler';
 import { syncPricesToBranchHandler } from '../handlers/central/syncPricesToBranchHandler';
@@ -21,7 +22,8 @@ router.get('/products', listProductsHandler);
 router.post('/products', createProductHandler);
 router.put('/products/:id', updateProductHandler);
 router.delete('/products/:id', deleteProductHandler);
-router.get('/prices/:storeId', validateParams(storeIdParamSchema), listActivePricesHandler);
+router.get('/prices/:storeId', validateParams(storeIdParamSchema), listAllPricesHandler);
+router.get('/prices/:storeId/active', validateParams(storeIdParamSchema), listActivePricesHandler);
 
 // Price management routes
 router.post('/prices', validateBody(createPriceRequestSchema), createOrUpdatePriceHandler);

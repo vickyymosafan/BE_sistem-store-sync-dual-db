@@ -242,7 +242,15 @@ async function loadPrices() {
                 const now = new Date();
                 const start = new Date(price.startDate);
                 const end = price.endDate ? new Date(price.endDate) : null;
-                const isActive = start <= now && (!end || end >= now);
+                
+                let statusBadge;
+                if (start > now) {
+                    statusBadge = '<span class="badge badge-info">Belum Aktif</span>';
+                } else if (end && end < now) {
+                    statusBadge = '<span class="badge badge-warning">Berakhir</span>';
+                } else {
+                    statusBadge = '<span class="badge badge-success">Aktif</span>';
+                }
                 
                 html += `<tr>
                     <td>${price.storeName || '-'}</td>
@@ -251,7 +259,7 @@ async function loadPrices() {
                     <td>Rp ${parseInt(price.salePrice).toLocaleString('id-ID')}</td>
                     <td>${new Date(price.startDate).toLocaleDateString('id-ID')}</td>
                     <td>${price.endDate ? new Date(price.endDate).toLocaleDateString('id-ID') : '-'}</td>
-                    <td>${isActive ? '<span class="badge badge-success">Aktif</span>' : '<span class="badge badge-warning">Berakhir</span>'}</td>
+                    <td>${statusBadge}</td>
                 </tr>`;
             });
         }
@@ -366,18 +374,34 @@ async function loadBranchProducts() {
         const products = await response.json();
         
         let html = '<table><thead><tr>';
-        html += '<th>Kode</th><th>Nama Produk</th><th>Harga Jual</th><th>Status</th><th>Mulai Berlaku</th><th>Selesai Berlaku</th>';
+        html += '<th>Kode</th><th>Nama Produk</th><th>Harga Jual</th><th>Status Produk</th><th>Status Harga</th><th>Mulai Berlaku</th><th>Selesai Berlaku</th>';
         html += '</tr></thead><tbody>';
         
         if (products.length === 0) {
-            html += '<tr><td colspan="6" class="empty">Belum ada data. Klik "Sync dari Pusat" untuk mengambil data.</td></tr>';
+            html += '<tr><td colspan="7" class="empty">Belum ada data. Klik "Sync dari Pusat" untuk mengambil data.</td></tr>';
         } else {
             products.forEach(product => {
+                const now = new Date();
+                const start = product.startDate ? new Date(product.startDate) : null;
+                const end = product.endDate ? new Date(product.endDate) : null;
+                
+                let priceStatusBadge = '<span class="badge badge-warning">Belum Ada Harga</span>';
+                if (start) {
+                    if (start > now) {
+                        priceStatusBadge = '<span class="badge badge-info">Belum Aktif</span>';
+                    } else if (end && end < now) {
+                        priceStatusBadge = '<span class="badge badge-warning">Berakhir</span>';
+                    } else {
+                        priceStatusBadge = '<span class="badge badge-success">Aktif</span>';
+                    }
+                }
+                
                 html += `<tr>
                     <td>${product.code}</td>
                     <td>${product.name}</td>
                     <td>Rp ${product.price ? parseInt(product.price).toLocaleString('id-ID') : '-'}</td>
                     <td>${product.active ? '<span class="badge badge-success">Aktif</span>' : '<span class="badge badge-danger">Nonaktif</span>'}</td>
+                    <td>${priceStatusBadge}</td>
                     <td>${product.startDate ? new Date(product.startDate).toLocaleDateString('id-ID') : '-'}</td>
                     <td>${product.endDate ? new Date(product.endDate).toLocaleDateString('id-ID') : '-'}</td>
                 </tr>`;
@@ -517,11 +541,12 @@ async function saveStock(event) {
 // API: Sales
 async function loadProductsForSale() {
     try {
-        const response = await fetch('/branch/bondowoso/products');
+        // Use endpoint that only returns products with ACTIVE prices
+        const response = await fetch('/branch/bondowoso/products/active-for-sale');
         const products = await response.json();
         
         let html = '<option value="">Pilih Produk...</option>';
-        products.filter(p => p.active && p.price).forEach(product => {
+        products.forEach(product => {
             html += `<option value="${product.id}" data-price="${product.price}">${product.code} - ${product.name} (Rp ${parseInt(product.price).toLocaleString('id-ID')})</option>`;
         });
         

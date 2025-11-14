@@ -19,6 +19,22 @@ export class PriceRepositoryPrisma implements IPriceRepository {
     return prices.map(this.toDomain);
   }
 
+  async findAllByStoreId(storeId: string): Promise<Price[]> {
+    const prices = await this.prisma.price.findMany({
+      where: {
+        storeId,
+        product: {
+          active: true,
+        },
+      },
+      orderBy: [
+        { startDate: 'desc' },
+        { createdAt: 'desc' },
+      ],
+    });
+    return prices.map(this.toDomain);
+  }
+
   async create(price: Omit<Price, 'id' | 'createdAt' | 'updatedAt'>): Promise<Price> {
     const created = await this.prisma.price.create({
       data: {

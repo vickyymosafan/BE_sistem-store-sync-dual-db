@@ -4,6 +4,7 @@ import { updateBranchInventoryHandler } from '../handlers/branch/updateBranchInv
 import { createBranchSaleHandler } from '../handlers/branch/createBranchSaleHandler';
 import { listBranchSalesHandler } from '../handlers/branch/listBranchSalesHandler';
 import { getBranchProductsHandler, getBranchStoresHandler } from '../handlers/branch/branchDataHandler';
+import { listActiveProductsForSaleHandler } from '../handlers/branch/listActiveProductsForSaleHandler';
 import { validateBody, validateQuery } from '../middleware/validationMiddleware';
 import { createSaleRequestSchema, listSalesQuerySchema } from '../schemas/saleSchemas';
 
@@ -11,6 +12,7 @@ const router = Router();
 
 // Branch data routes
 router.get('/bondowoso/products', getBranchProductsHandler);
+router.get('/bondowoso/products/active-for-sale', listActiveProductsForSaleHandler);
 router.get('/bondowoso/stores', getBranchStoresHandler);
 router.get('/bondowoso/inventory', listBranchInventoryHandler);
 router.post('/bondowoso/inventory', updateBranchInventoryHandler);

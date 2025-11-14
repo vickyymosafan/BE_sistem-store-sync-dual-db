@@ -73,18 +73,20 @@ export async function syncPricesToBranchHandler(
       });
     }
 
-    // Step 3: Get active prices from central for this store
+    // Step 3: Get all prices from central for this store (including future prices)
     const centralPrices = await prismaCentral.price.findMany({
       where: {
         storeId: centralStore.id,
-        startDate: { lte: new Date() },
-        OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
         product: { active: true },
       },
       include: {
         product: true,
         store: true,
       },
+      orderBy: [
+        { startDate: 'desc' },
+        { createdAt: 'desc' },
+      ],
     });
 
     // Step 4: Find corresponding store and products in branch by code

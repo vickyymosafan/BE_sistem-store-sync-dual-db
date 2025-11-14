@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { getPrismaBranch } from '../../../infra/db/prismaClientBranch';
 
-export async function getBranchProductsHandler(
+export async function listActiveProductsForSaleHandler(
   req: Request,
   res: Response,
   next: NextFunction
@@ -19,22 +19,27 @@ export async function getBranchProductsHandler(
       return;
     }
     
-    // Get products with their prices (only active products)
+    // Get products with ACTIVE prices only (for sale transactions)
     const products = await prismaBranch.product.findMany({
       where: { active: true },
       orderBy: { code: 'asc' },
     });
     
-    const productsWithPrices = await Promise.all(
+    const productsWithActivePrices = await Promise.all(
       products.map(async (product) => {
-        // Get the most recent price (could be active, future, or expired)
+        // Get only currently active price
         const price = await prismaBranch.price.findFirst({
           where: {
             storeId: store.id,
             productId: product.id,
+            startDate: { lte: new Date() },
+            OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
           },
           orderBy: { startDate: 'desc' },
         });
+        
+        // Only return products with active prices
+        if (!price) return null;
         
         return {
           id: product.id,
@@ -42,29 +47,15 @@ export async function getBranchProductsHandler(
           name: product.name,
           category: product.category,
           unit: product.unit,
-          active: product.active,
-          price: price?.salePrice,
-          startDate: price?.startDate,
-          endDate: price?.endDate,
+          price: price.salePrice,
         };
       })
     );
     
-    res.status(200).json(productsWithPrices);
-  } catch (error) {
-    next(error);
-  }
-}
-
-export async function getBranchStoresHandler(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    const prismaBranch = getPrismaBranch();
-    const stores = await prismaBranch.store.findMany();
-    res.status(200).json(stores);
+    // Filter out null values (products without active prices)
+    const validProducts = productsWithActivePrices.filter(p => p !== null);
+    
+    res.status(200).json(validProducts);
   } catch (error) {
     next(error);
   }

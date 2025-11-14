@@ -412,7 +412,7 @@
                         <button class="btn btn-primary" onclick="showAddPriceModal()">+ Tambah Harga</button>
                     </div>
                     <div class="alert alert-info">
-                        <strong>Info:</strong> Hanya menampilkan harga dari produk yang aktif. Produk yang dinonaktifkan tidak akan muncul di daftar ini.
+                        <strong>Info:</strong> Menampilkan semua harga dari produk yang aktif, termasuk harga yang belum berlaku (promo masa depan) dan yang sudah berakhir. Status harga: <span class="badge badge-success">Aktif</span> = sedang berlaku, <span class="badge badge-info">Belum Aktif</span> = akan berlaku di masa depan, <span class="badge badge-warning">Berakhir</span> = sudah tidak berlaku.
                     </div>
                     <div class="form-group" style="max-width: 300px;">
                         <label>Filter Cabang:</label>
@@ -466,7 +466,7 @@
                         <button class="btn btn-success" onclick="syncProductsFromCentral()">⬇️ Sync dari Pusat</button>
                     </div>
                     <div class="alert alert-info">
-                        <strong>Info:</strong> Hanya menampilkan produk aktif. Produk yang dinonaktifkan di pusat tidak akan muncul di daftar ini. Klik "Sync dari Pusat" untuk mengambil data terbaru.
+                        <strong>Info:</strong> Menampilkan semua produk aktif dengan harga terbaru (termasuk harga yang belum berlaku dan sudah berakhir). Status harga: <span class="badge badge-success">Aktif</span> = sedang berlaku, <span class="badge badge-info">Belum Aktif</span> = akan berlaku di masa depan, <span class="badge badge-warning">Berakhir</span> = sudah tidak berlaku. Klik "Sync dari Pusat" untuk mengambil data terbaru.
                     </div>
                     <div id="branch-products-table-container">
                         <div class="loading">Memuat data...</div>
