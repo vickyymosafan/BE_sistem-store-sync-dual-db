@@ -284,8 +284,11 @@ async function loadStoresForPrice() {
     const response = await fetch('/central/stores');
     const stores = await response.json();
     
+    // Filter only branch stores (exclude central/pusat)
+    const branchStores = stores.filter(store => store.type === 'BRANCH');
+    
     let html = '<option value="">Pilih Cabang...</option>';
-    stores.forEach(store => {
+    branchStores.forEach(store => {
         html += `<option value="${store.id}">${store.name}</option>`;
     });
     

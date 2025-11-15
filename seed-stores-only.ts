@@ -1,3 +1,4 @@
+// npx ts-node seed-stores-only.ts
 import { PrismaClient } from '@prisma/client';
 import * as dotenv from 'dotenv';
 

@@ -50,7 +50,12 @@ export async function getBranchProductsHandler(
       })
     );
     
-    res.status(200).json(productsWithPrices);
+    // Filter out products without prices (only show products with prices set by central)
+    const productsWithValidPrices = productsWithPrices.filter(
+      (product) => product.price !== null && product.price !== undefined
+    );
+    
+    res.status(200).json(productsWithValidPrices);
   } catch (error) {
     next(error);
   }
