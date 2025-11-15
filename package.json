@@ -1,7 +1,7 @@
 {
-  "name": "backend",
+  "name": "pt-indoagustus-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Sistem replikasi database PT Indo Agustus dengan arsitektur pusat-cabang untuk manajemen retail",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
@@ -13,9 +13,17 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "database-replication",
+    "postgresql",
+    "prisma",
+    "express",
+    "retail-system",
+    "point-of-sale",
+    "inventory-management"
+  ],
+  "author": "vickymosafan",
+  "license": "MIT",
   "type": "commonjs",
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
