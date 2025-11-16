@@ -148,7 +148,7 @@ export async function syncBranchSalesToCentralHandler(
       data: {
         sourceStoreId: centralBranchStore.id,
         targetStoreId: centralStore.id,
-        notes: `Synced ${syncedCount} sales from branch to central`,
+        notes: `Sinkronisasi ${syncedCount} transaksi dari cabang ke pusat`,
         summaryCount: syncedCount,
       },
     });

@@ -19,7 +19,7 @@ export function toSyncResultDTO(count: number): SyncResultDTO {
   return {
     success: true,
     count,
-    message: `Successfully synchronized ${count} record(s)`,
+    message: `Berhasil menyinkronkan ${count} data`,
   };
 }
 

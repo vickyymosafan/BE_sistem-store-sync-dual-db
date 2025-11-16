@@ -47,7 +47,7 @@ export async function syncBranchSalesToCentral(
   await centralSyncLogRepository.create({
     sourceStoreId: input.branchStoreId,
     targetStoreId: input.centralStoreId,
-    notes: `Synced ${pendingSales.length} sales from branch to central`,
+    notes: `Sinkronisasi ${pendingSales.length} transaksi dari cabang ke pusat`,
     summaryCount: pendingSales.length,
   });
 
