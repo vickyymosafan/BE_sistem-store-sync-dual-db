@@ -1,205 +1,382 @@
-# Contributing to PT Indo Agustus
+# Contributing Guide
 
-Terima kasih atas minat Anda untuk berkontribusi pada project ini! 🎉
+Terima kasih atas minat Anda untuk berkontribusi pada PT Indo Agustus project! 🎉
 
-## 📋 Code of Conduct
+## 🚀 Getting Started
 
-Dengan berpartisipasi dalam project ini, Anda diharapkan untuk menjaga lingkungan yang ramah dan profesional.
+1. Fork repository ini
+2. Clone fork Anda:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/BE_sistem-store-sync-dual-db.git
+   ```
+3. Ikuti [SETUP.md](SETUP.md) untuk instalasi
+4. Buat branch baru untuk fitur/fix Anda:
+   ```bash
+   git checkout -b feature/nama-fitur
+   ```
 
-## 🚀 Cara Berkontribusi
+## 📝 Development Guidelines
 
-### 1. Fork Repository
+### Code Style
 
+Project ini menggunakan:
+- **TypeScript** dengan strict mode
+- **ESLint** untuk linting
+- **Prettier** untuk formatting
+
+Sebelum commit, pastikan code Anda sudah:
 ```bash
-# Fork repository melalui GitHub UI
-# Clone fork Anda
-git clone https://github.com/vickyymosafan/BE_sistem-store-sync-dual-db.git
-cd BE_sistem-store-sync-dual-db
+npm run lint:fix    # Fix linting issues
+npm run format      # Format code
 ```
 
-### 2. Buat Branch Baru
+### Commit Messages
 
-```bash
-# Buat branch untuk fitur atau bugfix
-git checkout -b feature/nama-fitur
-# atau
-git checkout -b fix/nama-bug
+Gunakan format commit message yang jelas:
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
 ```
 
-### 3. Lakukan Perubahan
-
-- Tulis kode yang clean dan mudah dipahami
-- Ikuti style guide yang ada
-- Tambahkan komentar jika diperlukan
-- Update dokumentasi jika ada perubahan API
-
-### 4. Commit Changes
-
-Gunakan conventional commit format:
-
-```bash
-# Format: <type>(<scope>): <subject>
-
-# Contoh:
-git commit -m "feat(prices): add price history feature"
-git commit -m "fix(sync): resolve timezone issue in date comparison"
-git commit -m "docs(readme): update installation guide"
-```
-
-**Commit Types:**
+**Types:**
 - `feat`: Fitur baru
 - `fix`: Bug fix
 - `docs`: Perubahan dokumentasi
-- `style`: Format code (tidak mengubah logic)
+- `style`: Perubahan formatting (tidak mengubah logic)
 - `refactor`: Refactoring code
 - `test`: Menambah atau update tests
 - `chore`: Maintenance tasks
 
-### 5. Push ke Fork
+**Contoh:**
+```
+feat(sync): add automatic retry for failed sync
 
-```bash
-git push origin feature/nama-fitur
+- Implement exponential backoff
+- Add max retry configuration
+- Log retry attempts
+
+Closes #123
 ```
 
-### 6. Buat Pull Request
+### Architecture Guidelines
 
-- Buka GitHub dan buat Pull Request dari fork Anda
-- Jelaskan perubahan yang Anda buat
-- Reference issue yang terkait (jika ada)
+Project menggunakan **Clean Architecture** dengan 3 layers:
 
-## 🎨 Style Guide
+1. **Domain Layer** (`src/domain/`)
+   - Pure business logic
+   - Tidak boleh import dari infra atau http layer
+   - Entities, repositories interfaces, use cases
 
-### TypeScript/JavaScript
+2. **Infrastructure Layer** (`src/infra/`)
+   - Technical implementations
+   - Database, external services
+   - Repository implementations, mappers
+
+3. **HTTP Layer** (`src/http/`)
+   - Web API
+   - Routes, handlers, middleware, validation
+
+**Rules:**
+- Domain layer tidak boleh depend pada layer lain
+- Infra layer boleh depend pada domain
+- HTTP layer boleh depend pada domain dan infra
+- Gunakan dependency injection
+
+### File Naming Conventions
+
+- **TypeScript files**: camelCase (`createProduct.ts`)
+- **Interfaces**: Prefix dengan `I` (`IProductRepository.ts`)
+- **Mappers**: Suffix dengan `Mapper` (`productMapper.ts`)
+- **Schemas**: Suffix dengan `Schemas` (`priceSchemas.ts`)
+
+### Adding New Features
+
+#### 1. Tambah Entity Baru
 
 ```typescript
-// ✅ Good
-async function getUserById(id: string): Promise<User> {
-  const user = await userRepository.findById(id);
-  if (!user) {
-    throw new Error('User not found');
+// src/domain/entities/NewEntity.ts
+export interface NewEntity {
+  id: string;
+  name: string;
+  // ... properties
+}
+```
+
+#### 2. Tambah Repository Interface
+
+```typescript
+// src/domain/repositories/INewEntityRepository.ts
+import { NewEntity } from '../entities/NewEntity';
+
+export interface INewEntityRepository {
+  findAll(): Promise<NewEntity[]>;
+  findById(id: string): Promise<NewEntity | null>;
+  create(data: Omit<NewEntity, 'id'>): Promise<NewEntity>;
+  // ... methods
+}
+```
+
+#### 3. Tambah Use Case
+
+```typescript
+// src/domain/usecases/createNewEntity.ts
+import { NewEntity } from '../entities/NewEntity';
+import { INewEntityRepository } from '../repositories/INewEntityRepository';
+
+export default async function createNewEntity(
+  repository: INewEntityRepository,
+  data: Omit<NewEntity, 'id'>
+): Promise<NewEntity> {
+  // Business logic here
+  return await repository.create(data);
+}
+```
+
+#### 4. Implement Repository
+
+```typescript
+// src/infra/repositories/prisma/PrismaNewEntityRepository.ts
+import { PrismaClient } from '@prisma/client';
+import { INewEntityRepository } from '../../../domain/repositories/INewEntityRepository';
+import { NewEntity } from '../../../domain/entities/NewEntity';
+import { newEntityMapper } from '../../mappers/newEntityMapper';
+
+export class PrismaNewEntityRepository implements INewEntityRepository {
+  constructor(private prisma: PrismaClient) {}
+
+  async findAll(): Promise<NewEntity[]> {
+    const records = await this.prisma.newEntity.findMany();
+    return records.map(newEntityMapper.toDomain);
   }
-  return user;
-}
 
-// ❌ Bad
-async function getUser(id) {
-  return await userRepository.findById(id);
+  // ... implement other methods
 }
 ```
 
-### Naming Conventions
+#### 5. Tambah Mapper
 
-- **Variables/Functions:** camelCase (`getUserData`, `totalPrice`)
-- **Classes/Interfaces:** PascalCase (`UserRepository`, `PriceDTO`)
-- **Constants:** UPPER_SNAKE_CASE (`MAX_RETRY_COUNT`, `API_BASE_URL`)
-- **Files:** kebab-case (`user-repository.ts`, `price-handler.ts`)
+```typescript
+// src/infra/mappers/newEntityMapper.ts
+import { NewEntity as PrismaNewEntity } from '@prisma/client';
+import { NewEntity } from '../../domain/entities/NewEntity';
 
-### Code Organization
+export const newEntityMapper = {
+  toDomain(prisma: PrismaNewEntity): NewEntity {
+    return {
+      id: prisma.id,
+      name: prisma.name,
+      // ... map properties
+    };
+  },
 
+  toPrisma(domain: NewEntity): PrismaNewEntity {
+    return {
+      id: domain.id,
+      name: domain.name,
+      // ... map properties
+    };
+  },
+};
 ```
-backend/src/
-├── domain/          # Business logic
-│   ├── entities/    # Domain models
-│   ├── repositories/# Repository interfaces
-│   └── usecases/    # Use cases
-├── infra/           # Infrastructure
-│   ├── db/          # Database clients
-│   ├── repositories/# Repository implementations
-│   └── mappers/     # Data mappers
-└── http/            # HTTP layer
-    ├── handlers/    # Request handlers
-    ├── routes/      # Route definitions
-    └── schemas/     # Validation schemas
+
+#### 6. Tambah Handler
+
+```typescript
+// src/http/handlers/newEntity/createNewEntityHandler.ts
+import { Request, Response } from 'express';
+import createNewEntity from '../../../domain/usecases/createNewEntity';
+import { PrismaNewEntityRepository } from '../../../infra/repositories/prisma/PrismaNewEntityRepository';
+import { prismaClientCentral } from '../../../infra/db/prismaClientCentral';
+
+export async function createNewEntityHandler(req: Request, res: Response) {
+  try {
+    const repository = new PrismaNewEntityRepository(prismaClientCentral);
+    const result = await createNewEntity(repository, req.body);
+    res.status(201).json(result);
+  } catch (error) {
+    throw error; // Will be caught by error middleware
+  }
+}
 ```
 
-## 🧪 Testing
+#### 7. Tambah Route
+
+```typescript
+// src/http/routes/newEntityRoutes.ts
+import { Router } from 'express';
+import { createNewEntityHandler } from '../handlers/newEntity/createNewEntityHandler';
+import { validate } from '../middleware/validationMiddleware';
+import { createNewEntitySchema } from '../schemas/newEntitySchemas';
+
+const router = Router();
+
+router.post('/', validate(createNewEntitySchema), createNewEntityHandler);
+
+export default router;
+```
+
+#### 8. Tambah Validation Schema
+
+```typescript
+// src/http/schemas/newEntitySchemas.ts
+import { z } from 'zod';
+
+export const createNewEntitySchema = z.object({
+  body: z.object({
+    name: z.string().min(1).max(100),
+    // ... validation rules
+  }),
+});
+```
+
+### Database Changes
+
+#### Menambah Tabel/Field Baru
+
+1. Edit `prisma/schema.prisma`:
+```prisma
+model NewEntity {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+```
+
+2. Generate migration:
+```bash
+npx prisma migrate dev --name add_new_entity
+```
+
+3. Generate Prisma Client:
+```bash
+npm run db:generate
+```
+
+4. Update seed script jika perlu:
+```typescript
+// prisma/seed.ts
+await prisma.newEntity.createMany({
+  data: [
+    { name: 'Example 1' },
+    { name: 'Example 2' },
+  ],
+});
+```
+
+### Testing
 
 ```bash
-# Run tests
+# Run tests (coming soon)
 npm test
 
-# Run tests with coverage
-npm run test:coverage
-
 # Run specific test
-npm test -- user.test.ts
+npm test -- newEntity.test.ts
+
+# Run with coverage
+npm test -- --coverage
 ```
 
-## 📝 Documentation
+### Documentation
 
-- Update README.md jika ada perubahan fitur
-- Tambahkan JSDoc untuk fungsi public
-- Update UI-DOCUMENTATION.md untuk perubahan UI
-- Buat file BUGFIX-*.md untuk dokumentasi bug fix
+- Update README.md jika menambah fitur besar
+- Tambah JSDoc comments untuk functions/classes
+- Update SETUP.md jika ada perubahan setup
+- Update steering rules di `../.kiro/steering/` jika perlu
 
-## 🐛 Melaporkan Bug
+## 🔍 Pull Request Process
+
+1. Pastikan code Anda sudah:
+   - Lulus linting: `npm run lint`
+   - Formatted: `npm run format`
+   - Build berhasil: `npm run build`
+   - Tests pass: `npm test` (jika ada)
+
+2. Update dokumentasi jika perlu
+
+3. Buat Pull Request dengan deskripsi yang jelas:
+   - Apa yang diubah?
+   - Kenapa perubahan ini diperlukan?
+   - Bagaimana cara test perubahan ini?
+   - Screenshot (jika ada perubahan UI)
+
+4. Link ke issue yang terkait (jika ada)
+
+5. Tunggu review dari maintainer
+
+## 🐛 Reporting Bugs
 
 Gunakan GitHub Issues dengan template:
 
 ```markdown
-**Deskripsi Bug:**
-Jelaskan bug yang terjadi
+**Describe the bug**
+A clear description of what the bug is.
 
-**Cara Reproduksi:**
-1. Buka halaman X
-2. Klik tombol Y
-3. Lihat error Z
+**To Reproduce**
+Steps to reproduce:
+1. Go to '...'
+2. Click on '...'
+3. See error
 
-**Expected Behavior:**
-Apa yang seharusnya terjadi
+**Expected behavior**
+What you expected to happen.
 
-**Screenshots:**
-Tambahkan screenshot jika ada
+**Screenshots**
+If applicable, add screenshots.
 
 **Environment:**
-- OS: Windows 10
-- Browser: Chrome 120
-- Node: v20.10.0
+- OS: [e.g. Windows 10]
+- Node version: [e.g. 18.17.0]
+- PostgreSQL version: [e.g. 14.5]
+
+**Additional context**
+Any other context about the problem.
 ```
 
-## 💡 Request Fitur
+## 💡 Feature Requests
 
-Gunakan GitHub Issues dengan template:
+Gunakan GitHub Issues dengan label `enhancement`:
 
 ```markdown
-**Fitur yang Diinginkan:**
-Jelaskan fitur yang Anda inginkan
+**Is your feature request related to a problem?**
+A clear description of the problem.
 
-**Use Case:**
-Kapan fitur ini akan digunakan?
+**Describe the solution you'd like**
+What you want to happen.
 
-**Alternatif:**
-Apakah ada alternatif yang sudah Anda pertimbangkan?
+**Describe alternatives you've considered**
+Other solutions you've thought about.
 
-**Additional Context:**
-Informasi tambahan
+**Additional context**
+Any other context or screenshots.
 ```
 
-## ✅ Pull Request Checklist
+## 📚 Resources
 
-Sebelum submit PR, pastikan:
+- [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Prisma Documentation](https://www.prisma.io/docs/)
+- [Express.js Guide](https://expressjs.com/en/guide/routing.html)
 
-- [ ] Code sudah di-test dan berjalan dengan baik
-- [ ] Tidak ada error di console
-- [ ] Code sudah di-lint (`npm run lint`)
-- [ ] Code sudah di-format (`npm run format`)
-- [ ] Dokumentasi sudah di-update
-- [ ] Commit message mengikuti conventional format
-- [ ] PR description jelas dan lengkap
+## 🤝 Code of Conduct
 
-## 🔍 Review Process
+- Be respectful and inclusive
+- Provide constructive feedback
+- Focus on what is best for the community
+- Show empathy towards other community members
 
-1. Maintainer akan review PR Anda
-2. Jika ada feedback, lakukan perubahan yang diminta
-3. Setelah approved, PR akan di-merge
-4. Branch akan di-delete setelah merge
-
-## 📞 Kontak
+## 📞 Contact
 
 Jika ada pertanyaan, silakan:
-- Buka GitHub Issue
-- Email: mvickymosafan@gmail.com
+- Buka issue di GitHub
+- Contact: vickymosafan
 
-## 🙏 Terima Kasih!
+---
 
-Kontribusi Anda sangat berarti untuk project ini! 🎉
+Thank you for contributing! 🙏

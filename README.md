@@ -33,24 +33,58 @@ Sistem replikasi database dengan arsitektur pusat-cabang untuk manajemen retail.
 - **Frontend:** HTML, CSS, Vanilla JavaScript
 - **Arsitektur:** Clean Architecture (3 layers)
 
-## 📦 Instalasi
+## 📦 Quick Start
+
+### Automatic Setup (Recommended)
+
+**Windows:**
+```bash
+# Run setup script
+setup.bat
+```
+
+**Linux/macOS:**
+```bash
+# Make script executable
+chmod +x setup.sh
+
+# Run setup script
+./setup.sh
+```
+
+### Manual Setup
 
 ```bash
-# Clone repository
+# 1. Clone repository
 git clone https://github.com/vickyymosafan/BE_sistem-store-sync-dual-db.git
 cd BE_sistem-store-sync-dual-db
 
-# Install dependencies
+# 2. Install dependencies
 cd backend
 npm install
 
-# Setup database
-npm run prisma:migrate
-npm run seed
+# 3. Setup environment
+cp .env.example .env.local
+# Edit .env.local with your database credentials
 
-# Start server
+# 4. Create databases
+# Windows: scripts\setup-db.bat
+# Linux/macOS: bash scripts/setup-db.sh
+
+# 5. Generate Prisma Client
+npm run db:generate
+
+# 6. Run migrations
+npx prisma migrate dev --name init
+
+# 7. Seed database
+npm run db:seed
+
+# 8. Start server
 npm run dev
 ```
+
+**Detailed setup guide:** See [SETUP.md](../SETUP.md)
 
 ## 🔧 Konfigurasi
 

@@ -11,7 +11,16 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\""
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "db:generate": "prisma generate",
+    "db:migrate:central": "dotenv -e .env.local -- prisma migrate dev --schema prisma/schema.prisma",
+    "db:migrate:branch": "dotenv -e .env.local -- prisma migrate dev --schema prisma/schema.prisma",
+    "db:push:central": "dotenv -e .env.local -- prisma db push --schema prisma/schema.prisma",
+    "db:push:branch": "dotenv -e .env.local -- prisma db push --schema prisma/schema.prisma",
+    "db:seed": "ts-node prisma/seed.ts",
+    "db:studio:central": "dotenv -e .env.local -- prisma studio --schema prisma/schema.prisma",
+    "db:studio:branch": "dotenv -e .env.local -- prisma studio --schema prisma/schema.prisma",
+    "setup": "npm install && npm run db:generate && echo Setup complete! Please configure .env.local and run database migrations."
   },
   "keywords": [
     "database-replication",
